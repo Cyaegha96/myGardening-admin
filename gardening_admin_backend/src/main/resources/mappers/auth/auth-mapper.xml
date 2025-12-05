@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ggirick.gardening_admin_backend.mappers.auth.AuthMapper">
+
+    <resultMap id="authMap" type="com.ggirick.gardening_admin_backend.dto.auth.AuthDTO">
+        <id property="authId" column="AUTH_ID"/>
+        <result property="userUid" column="USER_UID"/>
+        <result property="provider" column="PROVIDER"/>
+        <result property="providerUserId" column="PROVIDER_USER_ID"/>
+        <result property="id" column="ID"/>
+        <result property="pw" column="PW"/>
+        <result property="phone" column="PHONE"/>
+        <result property="email" column="EMAIL"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="updatedAt" column="UPDATED_AT"/>
+    </resultMap>
+
+    <select id="selectAuthById" resultMap="authMap">
+        SELECT *
+        FROM AUTH
+        WHERE ID = #{id}
+    </select>
+    <select id="selectAuthByUserUid" resultMap="authMap">
+        SELECT *
+        FROM AUTH
+        WHERE userUid = #{userUid}
+    </select>
+
+    <insert id="insertLoginHistory">
+        INSERT INTO LOGIN_HISTORY (LOGIN_ID, USER_UID,SESSION_ID, IP_ADDRESS, LOGIN_AT)
+        VALUES (LOGIN_HISTORY_SEQ.NEXTVAL, #{userUid},#{sessionId}, #{ipAddress}, SYSTIMESTAMP)
+    </insert>
+    <update id="logoutHistory">
+        update
+           LOGIN_HISTORY
+        SET LOGOUT_AT = SYSTIMESTAMP
+        WHERE SESSION_ID= #{sessionId}
+    </update>
+
+    <select id="selectAuthByProvider">
+        SELECT *
+        FROM auth
+        WHERE provider = #{provider}
+          AND provider_user_id = #{providerUserId}
+    </select>
+
+    <!-- 신규 회원가입 - AUTH 테이블 -->
+    <insert id="insertAuth">
+        INSERT INTO auth (
+            auth_id,
+            user_uid,
+            provider,
+            provider_user_id,
+            id,
+            pw,
+            phone,
+            email,
+            created_at,
+            updated_at
+        ) VALUES (
+                     auth_seq.NEXTVAL,
+                     #{userUid,jdbcType=VARCHAR},
+                     #{provider,jdbcType=VARCHAR},
+                     #{providerUserId ,jdbcType=VARCHAR},
+                     #{id, jdbcType=VARCHAR},
+                     #{pw, jdbcType=VARCHAR},
+                     #{phone, jdbcType=VARCHAR},
+                     #{email,jdbcType=VARCHAR},
+                     SYSTIMESTAMP,
+                     SYSTIMESTAMP
+                 )
+    </insert>
+
+</mapper>

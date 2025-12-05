@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ggirick.gardening_admin_backend.mappers.auth.UserMapper">
+
+    <!-- UID로 유저 조회 -->
+    <select id="selectUserByUid">
+        SELECT *
+        FROM users
+        WHERE uuid = #{uid}
+    </select>
+
+    <select id="selectUserByPhone">
+        SELECT *
+        FROM auth
+        WHERE phone=#{phone}
+    </select>
+
+    <!-- 신규 유저 생성 -->
+    <insert id="insertUser">
+        INSERT INTO users (
+            uuid,
+            created_at,
+            updated_at,
+            status
+        ) VALUES (
+                     #{uuid},
+                     SYSTIMESTAMP,
+                     SYSTIMESTAMP,
+                     DEFAULT
+                 )
+    </insert>
+
+    <!--신규 유저 정보 등록-->
+
+    <insert id="insertUserInfo" parameterType="com.ggirick.gardening_admin_backend.dto.auth.UserInfoDTO">
+        INSERT INTO user_info
+        (uuid,
+         name,
+         nickname,
+         address,
+         address_detail,
+         zipcode,
+         bio,
+         profile_url,
+         birth_date,
+         created_at,
+         updated_at)
+        VALUES
+            (#{uuid},
+             #{name, jdbcType=VARCHAR},
+             #{nickname, jdbcType=VARCHAR},
+             #{address, jdbcType=VARCHAR},
+             #{addressDetail, jdbcType=VARCHAR},
+             #{zipcode, jdbcType=VARCHAR},
+             #{bio, jdbcType=VARCHAR},
+             #{profileUrl, jdbcType=VARCHAR},
+             #{birthDate, jdbcType=VARCHAR},
+             SYSTIMESTAMP,
+             SYSTIMESTAMP)
+    </insert>
+    <select id="randomUserNickName" resultType="java.lang.String">
+        SELECT
+            (SELECT PREFIX_TEXT
+             FROM (SELECT PREFIX_TEXT FROM PLANT_NICKNAME_PREFIX ORDER BY DBMS_RANDOM.VALUE)
+             WHERE ROWNUM = 1)
+                || ' ' ||
+            (SELECT COMMON_NAME
+             FROM (SELECT COMMON_NAME FROM PLANT_INFO ORDER BY DBMS_RANDOM.VALUE)
+             WHERE ROWNUM = 1)
+                AS NICKNAME
+        FROM dual
+    </select>
+    <select id="selectUserInfoByUid" >
+        SELECT ui.*, a.email, a.phone
+        FROM user_info ui
+                 LEFT JOIN auth a
+                           ON ui.uuid = a.user_uid
+        WHERE ui.uuid = #{uid}
+    </select>
+    <update id="updateUserInfo">
+        UPDATE user_info
+        SET
+            name = #{name, jdbcType=VARCHAR},
+            nickname = #{nickname, jdbcType=VARCHAR},
+            address = #{address, jdbcType=VARCHAR},
+            address_detail = #{addressDetail, jdbcType=VARCHAR},
+            zipcode = #{zipcode, jdbcType=VARCHAR},
+            bio = #{bio, jdbcType=VARCHAR},
+            profile_url = #{profileUrl, jdbcType=VARCHAR},
+            birth_date = #{birthDate, jdbcType=VARCHAR},
+            updated_at = SYSTIMESTAMP
+        WHERE uuid = #{uuid}
+    </update>
+    <insert id="insertUserRole">
+        INSERT INTO USER_ROLE(
+            USER_UID,
+            ROLE_ID,
+            ASSIGNED_BY,
+            ASSIGNED_AT
+        )VALUES (
+                    #{userUid},
+                    #{roleId},
+                    #{assignedBy},
+                    SYSTIMESTAMP
+                )
+
+
+    </insert>
+    <select id="selectRoleNameByUserUid" resultType="string" parameterType="string">
+        SELECT r.ROLE_NAME
+        FROM user_role ur
+                 JOIN role r ON ur.ROLE_ID = r.ROLE_ID
+        WHERE ur.USER_UID = #{userUid}
+    </select>
+    <update id="updateUserEmailAndPhoneToAuth">
+        update auth
+        set phone=#{phone}, email=#{email}
+        where user_uid = #{userUid}
+    </update>
+</mapper>

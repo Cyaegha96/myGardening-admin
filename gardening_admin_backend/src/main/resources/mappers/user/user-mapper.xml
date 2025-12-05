@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ggirick.gardening_admin_backend.mappers.user.UsersDomainMapper">
+    <select id="findUsers" resultType="com.ggirick.gardening_admin_backend.dto.user.UsersDomainDTO">
+        SELECT *
+        FROM (
+        SELECT inner_query.*, ROWNUM rnum
+        FROM (
+        SELECT
+        u.uuid AS id,
+        u.status,
+        u.created_at As createdAt,
+        u.updated_at As updatedAt,
+        a.provider,
+        a.id AS userId,
+        a.provider_user_id AS providerUserId,
+        a.email,
+        a.phone,
+        i.name,
+        i.nickname,
+        i.address,
+        i.address_detail,
+        i.zipcode,
+        i.bio,
+        i.profile_url,
+        i.birth_date AS birthDate
+        FROM users u
+        LEFT JOIN auth a ON a.user_uid = u.uuid
+        LEFT JOIN user_info i ON i.uuid = u.uuid
+        <!-- 필터 조건 -->
+        <where>
+            <if test="filters.status != null">
+                AND u.status LIKE '%' || #{filters.status} || '%'
+
+            </if>
+            <if test="filters.email != null">
+                AND a.email LIKE '%' || #{filters.email} || '%'
+
+            </if>
+            <if test="filters.name != null">
+                AND i.name LIKE '%' || #{filters.name} || '%'
+
+            </if>
+            <if test="filters.nickname != null">
+                AND i.nickname LIKE '%' || #{filters.nickname} || '%'
+
+            </if>
+        </where>
+        <!--  정렬 조건 -->
+        ORDER BY
+        <choose>
+            <when test="sortField != null">
+                ${sortField} ${sortOrder}
+            </when>
+            <otherwise>
+                u.created_at DESC
+            </otherwise>
+        </choose>
+        ) inner_query
+        WHERE ROWNUM &lt;= #{offset} + #{perPage}
+        )
+        WHERE rnum &gt; #{offset}
+    </select>
+    <select id="findUsersByIds" parameterType="list"
+            resultType="com.ggirick.gardening_admin_backend.dto.user.UsersDomainDTO">
+        SELECT
+        u.uuid AS id,
+        u.status,
+        u.created_at AS createdAt,
+        u.updated_at AS updatedAt,
+        a.provider,
+        a.id AS userId,
+        a.provider_user_id AS providerUserId,
+        a.email,
+        a.phone,
+        i.name,
+        i.nickname,
+        i.address,
+        i.address_detail,
+        i.zipcode,
+        i.bio,
+        i.profile_url,
+        i.birth_date AS birthDate
+        FROM users u
+        LEFT JOIN auth a ON a.user_uid = u.uuid
+        LEFT JOIN user_info i ON i.uuid = u.uuid
+        WHERE u.uuid IN
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+    <insert id="insertUser" parameterType="com.ggirick.gardening_admin_backend.dto.user.UsersDomainDTO">
+        INSERT INTO users (
+        uuid,
+        status,
+        created_at,
+        updated_at
+        ) VALUES (
+        #{id},
+        #{status},
+        #{createdAt},
+        #{updatedAt}
+        );
+
+        <!-- auth 테이블도 함께 넣고 싶다면 -->
+        INSERT INTO auth (
+        user_uid,
+        provider,
+        provider_user_id,
+        email,
+        phone
+        ) VALUES (
+        #{id},
+        #{provider},
+        #{providerUserId},
+        #{email},
+        #{phone}
+        );
+
+        <!-- user_info 테이블도 함께 넣고 싶다면 -->
+        INSERT INTO user_info (
+        uuid,
+        name,
+        nickname,
+        address,
+        address_detail,
+        zipcode,
+        bio,
+        profile_url,
+        birth_date
+        ) VALUES (
+        #{id},
+        #{name},
+        #{nickname},
+        #{address},
+        #{addressDetail},
+        #{zipcode},
+        #{bio},
+        #{profileUrl},
+        #{birthDate}
+        );
+    </insert>
+    <select id="countUsers" resultType="int">
+        SELECT COUNT(*)
+        FROM users u
+        LEFT JOIN auth a ON a.user_uid = u.uuid
+        LEFT JOIN user_info i ON i.uuid = u.uuid
+        <where>
+            <if test="filters.status != null">
+                AND u.status LIKE '%' || #{filters.status} || '%'
+
+            </if>
+            <if test="filters.email != null">
+                AND a.email LIKE '%' || #{filters.email} || '%'
+
+            </if>
+            <if test="filters.name != null">
+                AND i.name LIKE '%' || #{filters.name} || '%'
+
+            </if>
+            <if test="filters.nickname != null">
+                AND i.nickname LIKE '%' || #{filters.nickname} || '%'
+            </if>
+        </where>
+    </select>
+
+    <update id="updateUsers">
+        UPDATE users
+        SET status = #{status},
+            updated_at =   SYSTIMESTAMP
+        WHERE uuid = #{id}
+    </update>
+
+    <update id="updateAuth">
+        UPDATE auth
+        SET email = #{email,jdbcType=VARCHAR},
+            phone = #{phone,jdbcType=VARCHAR}
+        WHERE user_uid = #{id}
+    </update>
+
+    <update id="updateUserInfo">
+        UPDATE user_info
+        SET name = #{name,jdbcType=VARCHAR},
+            nickname = #{nickname,jdbcType=VARCHAR},
+            address = #{address,jdbcType=VARCHAR},
+            address_detail = #{addressDetail,jdbcType=VARCHAR},
+            zipcode = #{zipcode,jdbcType=VARCHAR},
+            bio = #{bio,jdbcType=VARCHAR},
+            profile_url = #{profileUrl,jdbcType=VARCHAR},
+            birth_date = #{birthDate,jdbcType=VARCHAR}
+        WHERE uuid = #{id}
+    </update>
+    <delete id="deleteUserInfo">
+        DELETE FROM user_info WHERE uuid = #{uuid}
+
+
+    </delete>
+    <delete id="deleteUserAuth">
+        DELETE FROM auth WHERE user_uid = #{uuid}
+    </delete>
+    <delete id="deleteUser">
+        DELETE FROM users WHERE uuid = #{uuid}
+    </delete>
+    <select id="selectOne" resultType="com.ggirick.gardening_admin_backend.dto.user.UsersDomainDTO">
+        SELECT
+            u.uuid AS id,
+            u.status,
+            u.created_at,
+            u.updated_at,
+            a.provider,
+            a.id AS userId,
+            a.provider_user_id,
+            a.email,
+            a.phone,
+            i.name,
+            i.nickname,
+            i.address,
+            i.address_detail,
+            i.zipcode,
+            i.bio,
+            i.profile_url,
+            i.birth_date
+        FROM users u
+                 LEFT JOIN auth a ON a.user_uid = u.uuid
+                 LEFT JOIN user_info i ON i.uuid = u.uuid
+        WHERE u.uuid = #{uuid}
+    </select>
+    <select id="selectRoleByUserUid">
+        SELECT r.ROLE_NAME
+        FROM user_role ur
+                 JOIN role r ON ur.ROLE_ID = r.ROLE_ID
+        WHERE ur.USER_UID = #{userUid}
+    </select>
+</mapper>

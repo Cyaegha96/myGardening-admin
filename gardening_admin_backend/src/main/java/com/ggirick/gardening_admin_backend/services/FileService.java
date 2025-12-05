@@ -1,0 +1,57 @@
+package com.ggirick.gardening_admin_backend.services;
+
+import com.ggirick.gardening_admin_backend.utils.FileUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
+
+@Service
+@RequiredArgsConstructor
+public class FileService {
+    private final FileUtil fileUtil;
+
+    /**
+     * 파일 업로드 후 GCS 공개 URL 반환
+     *
+     * @param file 업로드할 파일
+     * @param folderPath 업로드할 경로 (예: "chat/images/" or "workspace/icons/")
+     * @return Map GCS 공개 URL,실제 저장된 파일명(oriName, sysName)
+     */
+    public Map<String, String> uploadFile(MultipartFile file, String folderPath) throws Exception {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("업로드할 파일이 존재하지 않습니다.");
+        }
+
+        return fileUtil.uploadFileAndGetInfo(file.getOriginalFilename(), folderPath, file);
+    }
+
+
+    @Async // ⭐ 이 메서드는 호출 즉시 별도의 스레드에서 실행됩니다.
+    public void uploadFileAsync(MultipartFile file, String folderPath) {
+        try {
+            Map<String, String> uploadInfo = uploadFile(file, folderPath);
+            // 업로드 정보(URL 등)를 DB에 저장하는 로직을 여기에 추가할 수 있습니다.
+            System.out.println("GCS 업로드 비동기 완료. URL: " + uploadInfo.get("publicUrl"));
+
+        } catch (Exception e) {
+            // 비동기 스레드에서 발생한 예외는 메인 스레드로 전파되지 않으므로, 로그 기록이 중요합니다.
+            System.err.println("GCS 파일 업로드 중 비동기 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * 파일 삭제 (URL 또는 sysName 모두 지원)
+     *
+     * @param sysName 파일의 sysname
+     */
+    public void deleteFile(String sysName) {
+
+
+        fileUtil.deleteFile(sysName);
+    }
+}

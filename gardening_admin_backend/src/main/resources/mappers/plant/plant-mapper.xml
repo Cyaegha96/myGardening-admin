@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ggirick.gardening_admin_backend.mappers.plant.PlantInfoMapper">
+    <select id="findPlants" resultType="com.ggirick.gardening_admin_backend.dto.plant.PlantInfoDTO">
+
+        SELECT *
+        FROM (
+        SELECT inner_query.*, ROWNUM rnum
+        FROM (
+        SELECT
+        p.SCIENTIFIC_NAME        AS id,
+        p.SCIENTIFIC_NAME        AS scientificName,
+        p.COMMON_NAME            AS commonName,
+        p.FAMILY                 AS family,
+        p.GENUS                  AS genus,
+        p.ORIGIN                 AS origin,
+        p.DESCRIPTION            AS description,
+        p.SAMPLE_IMAGE_URL       AS sampleImageUrl,
+        p.COMMON_USES            AS commonUses,
+        p.CULTURAL_SIGNIFICANCE  AS culturalSignificance,
+        p.ENVIRONMENT            AS environment,
+        p.LIGHT                  AS light,
+        p.TEMPERATURE_HUMIDITY   AS temperatureHumidity,
+        p.WATERING               AS watering,
+        p.SOIL                   AS soil,
+        p.FERTILIZER             AS fertilizer,
+        p.POT_REPOT              AS potRepot,
+        p.PESTS_TIPS             AS pestsTips,
+        p.PROPAGATION            AS propagation
+
+        FROM PLANT_INFO p
+
+        <!-- 필터 조건 -->
+        <where>
+            <if test="filters.scientificName != null">
+                AND p.SCIENTIFIC_NAME LIKE '%' || #{filters.scientificName} || '%'
+            </if>
+
+            <if test="filters.commonName != null">
+                AND p.COMMON_NAME LIKE '%' || #{filters.commonName} || '%'
+            </if>
+
+            <if test="filters.family != null">
+                AND p.FAMILY LIKE '%' || #{filters.family} || '%'
+            </if>
+
+            <if test="filters.genus != null">
+                AND p.GENUS LIKE '%' || #{filters.genus} || '%'
+            </if>
+
+            <if test="filters.origin != null">
+                AND p.ORIGIN LIKE '%' || #{filters.origin} || '%'
+            </if>
+        </where>
+
+        <!-- 정렬 조건 -->
+        ORDER BY
+        <choose>
+            <when test="sortField != null">
+                ${sortField} ${sortOrder}
+            </when>
+            <otherwise>
+                p.SCIENTIFIC_NAME ASC
+            </otherwise>
+        </choose>
+
+        ) inner_query
+        WHERE ROWNUM &lt;= #{offset} + #{limit}
+        )
+        WHERE rnum &gt; #{offset}
+
+    </select>
+    <select id="countPlants" resultType="int">
+
+        SELECT COUNT(*)
+        FROM PLANT_INFO p
+
+        <where>
+            <if test="filters.scientificName != null">
+                AND p.SCIENTIFIC_NAME LIKE '%' || #{filters.scientificName} || '%'
+            </if>
+
+            <if test="filters.commonName != null">
+                AND p.COMMON_NAME LIKE '%' || #{filters.commonName} || '%'
+            </if>
+
+            <if test="filters.family != null">
+                AND p.FAMILY LIKE '%' || #{filters.family} || '%'
+            </if>
+
+            <if test="filters.genus != null">
+                AND p.GENUS LIKE '%' || #{filters.genus} || '%'
+            </if>
+
+            <if test="filters.origin != null">
+                AND p.ORIGIN LIKE '%' || #{filters.origin} || '%'
+            </if>
+        </where>
+
+    </select>
+    <select id="selectOne">
+        SELECT
+            p.SCIENTIFIC_NAME        AS id,
+            p.SCIENTIFIC_NAME        AS scientificName,
+            p.COMMON_NAME            AS commonName,
+            p.FAMILY                 AS family,
+            p.GENUS                  AS genus,
+            p.ORIGIN                 AS origin,
+            p.DESCRIPTION            AS description,
+            p.SAMPLE_IMAGE_URL       AS sampleImageUrl,
+            p.COMMON_USES            AS commonUses,
+            p.CULTURAL_SIGNIFICANCE  AS culturalSignificance,
+            p.ENVIRONMENT            AS environment,
+            p.LIGHT                  AS light,
+            p.TEMPERATURE_HUMIDITY   AS temperatureHumidity,
+            p.WATERING               AS watering,
+            p.SOIL                   AS soil,
+            p.FERTILIZER             AS fertilizer,
+            p.POT_REPOT              AS potRepot,
+            p.PESTS_TIPS             AS pestsTips,
+            p.PROPAGATION            AS propagation
+
+        FROM PLANT_INFO p
+        WHERE SCIENTIFIC_NAME = #{scientificName }
+    </select>
+    <insert id="insertPlant">
+        INSERT INTO PLANT_INFO (
+            SCIENTIFIC_NAME,
+            COMMON_NAME,
+            FAMILY,
+            GENUS,
+            ORIGIN,
+            DESCRIPTION,
+            ENVIRONMENT,
+            LIGHT,
+            SOIL,
+            WATERING,
+            TEMPERATURE_HUMIDITY,
+            FERTILIZER,
+            POT_REPOT,
+            PROPAGATION,
+            PESTS_TIPS,
+            COMMON_USES,
+            CULTURAL_SIGNIFICANCE,
+            SAMPLE_IMAGE_URL
+        ) VALUES (
+                     #{scientificName},
+                     #{commonName},
+                     #{family},
+                     #{genus},
+                     #{origin},
+                     #{description},
+                     #{environment},
+                     #{light},
+                     #{soil},
+                     #{watering},
+                     #{temperatureHumidity},
+                     #{fertilizer},
+                     #{potRepot},
+                     #{propagation},
+                     #{pestsTips},
+                     #{commonUses},
+                     #{culturalSignificance},
+                     #{sampleImageUrl}
+                 )
+    </insert>
+    <update id="updatePlant">
+        UPDATE PLANT_INFO
+        SET
+            COMMON_NAME            = #{commonName},
+            FAMILY                 = #{family},
+            GENUS                  = #{genus},
+            ORIGIN                 = #{origin},
+            DESCRIPTION            = #{description},
+            ENVIRONMENT            = #{environment},
+            LIGHT                  = #{light},
+            SOIL                   = #{soil},
+            WATERING               = #{watering},
+            TEMPERATURE_HUMIDITY   = #{temperatureHumidity},
+            FERTILIZER             = #{fertilizer},
+            POT_REPOT              = #{potRepot},
+            PROPAGATION            = #{propagation},
+            PESTS_TIPS             = #{pestsTips},
+            COMMON_USES            = #{commonUses},
+            CULTURAL_SIGNIFICANCE  = #{culturalSignificance},
+            SAMPLE_IMAGE_URL       = #{sampleImageUrl}
+        WHERE SCIENTIFIC_NAME = #{scientificName}
+    </update>
+    <delete id="deletePlant">
+        DELETE FROM PLANT_INFO
+        WHERE SCIENTIFIC_NAME = #{scientificName}
+    </delete>
+    <select id="findMany">
+        SELECT *
+        FROM PLANT_INFO
+        WHERE SCIENTIFIC_NAME IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+    <update id="updateMany">
+        UPDATE PLANT_INFO
+        SET
+        COMMON_NAME            = #{dto.commonName},
+        FAMILY                 = #{dto.family},
+        GENUS                  = #{dto.genus},
+        ORIGIN                 = #{dto.origin},
+        DESCRIPTION            = #{dto.description},
+        ENVIRONMENT            = #{dto.environment},
+        LIGHT                  = #{dto.light},
+        SOIL                   = #{dto.soil},
+        WATERING               = #{dto.watering},
+        TEMPERATURE_HUMIDITY   = #{dto.temperatureHumidity},
+        FERTILIZER             = #{dto.fertilizer},
+        POT_REPOT              = #{dto.potRepot},
+        PROPAGATION            = #{dto.propagation},
+        PESTS_TIPS             = #{dto.pestsTips},
+        COMMON_USES            = #{dto.commonUses},
+        CULTURAL_SIGNIFICANCE  = #{dto.culturalSignificance},
+        SAMPLE_IMAGE_URL       = #{dto.sampleImageUrl}
+        WHERE SCIENTIFIC_NAME IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+    <delete id="deleteMany">
+        DELETE FROM PLANT_INFO
+        WHERE SCIENTIFIC_NAME IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

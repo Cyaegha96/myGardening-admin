@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ggirick.gardening_admin_backend.mappers.board.BoardMapper">
+    <select id="findBoards" resultType="com.ggirick.gardening_admin_backend.dto.board.BoardDTO">
+
+        SELECT *
+        FROM (
+        SELECT inner_query.*, ROWNUM rnum
+        FROM (
+        SELECT
+        b.ID        AS id,
+        b.CONTENTS  AS contents,
+        b.CREATED_AT AS createdAt,
+        b.IS_NOTIFICATION AS isNotification,
+        b.STATUS         AS status,
+        b.TITLE          AS title,
+        b.UPDATED_AT     AS updatedAt,
+        b.VIEW_COUNT      As  viewCount,
+        b.WRITER_UID        As writerUid,
+        i.nickname         As nickname
+
+        FROM Board b
+                 LEFT JOIN user_info i ON b.WRITER_UID = i.uuid
+        <!-- 필터 조건 -->
+        <where>
+            <if test="filters.contents!= null">
+                AND b.contents LIKE '%' || #{filters.contents} || '%'
+            </if>
+
+            <if test="filters.nickname != null">
+                AND  i.nickname  LIKE '%' || #{filters.nickname} || '%'
+            </if>
+
+            <if test="filters.title != null">
+                AND b.title LIKE '%' || #{filters.title} || '%'
+            </if>
+
+        </where>
+
+        <!-- 정렬 조건 -->
+        ORDER BY
+        <choose>
+            <when test="sortField != null">
+                ${sortField} ${sortOrder}
+            </when>
+            <otherwise>
+                b.CREATED_AT ASC
+            </otherwise>
+        </choose>
+
+        ) inner_query
+        WHERE ROWNUM &lt;= #{offset} + #{limit}
+        )
+        WHERE rnum &gt; #{offset}
+
+    </select>
+    <select id="selectBoardById" parameterType="int">
+        SELECT
+            b.id,
+            b.title,
+            b.writer_uid,
+            i.nickname,
+            b.contents,
+            b.is_notification,
+            b.status,
+            b.view_count,
+            b.created_at,
+            b.updated_at
+        FROM board b
+                 LEFT JOIN user_info i ON b.WRITER_UID = i.uuid
+        WHERE b.id = #{id}
+    </select>
+    <select id="countBoards">
+        select count(*)
+        FROM Board b
+        LEFT JOIN user_info i ON b.WRITER_UID = i.uuid
+        <!-- 필터 조건 -->
+        <where>
+            <if test="filters.contents!= null">
+                AND b.contents LIKE '%' || #{filters.contents} || '%'
+            </if>
+
+            <if test="filters.nickname != null">
+                AND  i.nickname  LIKE '%' || #{filters.nickname} || '%'
+            </if>
+
+            <if test="filters.title != null">
+                AND b.title LIKE '%' || #{filters.title} || '%'
+            </if>
+
+        </where>
+    </select>
+
+    <select id="selectCommentsByBoardId" parameterType="int" resultType="com.ggirick.gardening_admin_backend.dto.board.BoardCommentDTO">
+        SELECT
+            b.id,
+            b.board_id,
+            b.contents,
+            b.writer_uid,
+            i.nickname,
+            b.ref_comment_id,
+            b.status,
+            b.created_at,
+            b.updated_at
+        FROM board_comment b
+                 LEFT JOIN user_info i ON b.WRITER_UID = i.uuid
+        WHERE board_id = #{id}
+
+        ORDER BY created_at ASC
+    </select>
+
+    <select id="selectFilesByBoardId" parameterType="int" resultType="com.ggirick.gardening_admin_backend.dto.board.BoardFileDTO">
+        SELECT
+            id,
+            board_id,
+            ori_name,
+            sys_name,
+            url,
+            created_at
+        FROM board_file
+        WHERE board_id = #{id}
+        ORDER BY created_at ASC
+    </select>
+    <!-- 수정 -->
+    <update id="updateBoard" parameterType="com.ggirick.gardening_admin_backend.dto.board.BoardDTO">
+        UPDATE BOARD
+        SET TITLE           = #{title},
+            CONTENTS         = #{contents},
+            STATUS = #{status},
+            IS_NOTIFICATION = #{isNotification}
+        WHERE ID = #{id}
+    </update>
+
+    <!-- 삭제 -->
+    <update id="deleteBoard">
+        UPDATE BOARD
+        SET STATUS = 'delete',
+            UPDATED_AT = CURRENT_TIMESTAMP
+        WHERE ID = #{id}
+    </update>
+
+</mapper>

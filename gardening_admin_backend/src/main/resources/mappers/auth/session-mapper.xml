@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ggirick.gardening_admin_backend.mappers.auth.UserSessionMapper">
+    <resultMap id="userSessionMap" type="com.ggirick.gardening_admin_backend.dto.auth.UserSessionDTO">
+        <id property="sessionId" column="SESSION_ID"/>
+        <result property="userUid" column="USER_UID"/>
+        <result property="refreshToken" column="REFRESH_TOKEN"/>
+        <result property="expiresAt" column="EXPIRES_AT"/>
+    </resultMap>
+
+
+    <insert id="insertSession">
+        INSERT INTO USER_SESSION (SESSION_ID, USER_UID, PROVIDER, ACCESS_TOKEN, REFRESH_TOKEN, EXPIRES_AT, LAST_ACCESS_TOKEN_ISSUED_AT,LAST_ACCESS_TOKEN_EXPIRES_AT,  IP_ADDRESS, IS_REVOKED, CREATED_AT)
+        VALUES (#{sessionId}, #{userUid}, #{provider}, #{accessToken}, #{refreshToken},  #{expiresAt}, SYSTIMESTAMP, #{lastAccessTokenExpiresAt}, #{ipAddress}, 'N', SYSTIMESTAMP)
+    </insert>
+    <update id="updateSession">
+        UPDATE USER_SESSION
+        SET
+            ACCESS_TOKEN = #{accessToken},
+            LAST_ACCESS_TOKEN_ISSUED_AT = SYSTIMESTAMP,
+            LAST_ACCESS_TOKEN_EXPIRES_AT = #{lastAccessTokenExpiresAt},
+            EXPIRES_AT = #{expiresAt},
+            IP_ADDRESS = #{ipAddress},
+
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE SESSION_ID = #{sessionId}
+          AND USER_UID = #{userUid}
+    </update>
+    <select id="selectActiveSessionsByUid">
+        SELECT session_id, access_token, refresh_token
+        FROM user_session
+        WHERE user_uid = #{uid} AND is_revoked = 'N'
+    </select>
+
+    <select id="selectValidSessionByUidAndToken" resultMap="userSessionMap">
+        SELECT *
+        FROM USER_SESSION
+        WHERE USER_UID = #{userUid}
+        AND REFRESH_TOKEN = #{refreshToken}
+        AND IS_REVOKED = 'N'
+        AND EXPIRES_AT &gt; SYSTIMESTAMP
+    </select>
+<select id="selectSessionById">
+    SELECT *
+    FROM USER_SESSION
+    WHERE
+       SESSION_ID = #{sessionId}
+      AND IS_REVOKED = 'N'
+      AND EXPIRES_AT &gt; SYSTIMESTAMP
+</select>
+    <update id="updateRevokedStatus">
+        UPDATE USER_SESSION
+        SET IS_REVOKED = 'Y', UPDATED_AT = SYSTIMESTAMP
+        WHERE SESSION_ID = #{sessionId}
+    </update>
+
+    <update id="revokeAllUserSessions">
+        UPDATE USER_SESSION
+        SET IS_REVOKED = 'Y', UPDATED_AT = SYSTIMESTAMP
+        WHERE USER_UID = #{uid}
+        AND IS_REVOKED = 'N'
+    </update>
+
+
+
+</mapper>

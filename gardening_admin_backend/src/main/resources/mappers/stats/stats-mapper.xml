@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ggirick.gardening_admin_backend.mappers.stats.StatsMapper">
+    <select id="getMonthlyUserStats" resultType="com.ggirick.gardening_admin_backend.dto.stats.UserStatsDTO">
+        SELECT TO_CHAR(created_at, 'YYYY-MM') AS period,
+        COUNT(*) AS count,
+        'MONTH' AS periodType
+        FROM users
+        <where>
+            <if test="startDate != null">
+                AND created_at &gt;= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND created_at &lt;= #{endDate}
+            </if>
+        </where>
+        GROUP BY TO_CHAR(created_at, 'YYYY-MM')
+        ORDER BY TO_CHAR(created_at, 'YYYY-MM')
+    </select>
+
+    <select id="getDailyUserStats" resultType="com.ggirick.gardening_admin_backend.dto.stats.UserStatsDTO">
+        SELECT TO_CHAR(created_at, 'YYYY-MM-DD') AS period,
+        COUNT(*) AS count,
+        'DAY' AS periodType
+        FROM users
+        <where>
+            <if test="startDate != null">
+                AND created_at &gt;= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND created_at &lt;= #{endDate}
+            </if>
+        </where>
+        GROUP BY TO_CHAR(created_at, 'YYYY-MM-DD')
+        ORDER BY TO_CHAR(created_at, 'YYYY-MM-DD')
+
+    </select>
+
+
+    <select id="getWeeklyUserStats" resultType="com.ggirick.gardening_admin_backend.dto.stats.UserStatsDTO">
+        SELECT TO_CHAR(TRUNC(created_at, 'IW'), 'YYYY-MM-DD') AS period,
+        COUNT(*) AS count,
+        'WEEKLY' AS periodType
+        FROM users
+        <where>
+            <if test="startDate != null">
+                AND created_at &gt;= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND created_at &lt;= #{endDate}
+            </if>
+        </where>
+        GROUP BY TRUNC(created_at, 'IW')
+        ORDER BY TRUNC(created_at, 'IW')
+    </select>
+
+    <select id="getYearlyUserStats" resultType="com.ggirick.gardening_admin_backend.dto.stats.UserStatsDTO">
+        SELECT TO_CHAR(created_at, 'YYYY') AS period,
+        COUNT(*) AS count,
+        'YEAR' AS periodType
+        FROM users
+        <where>
+            <if test="startDate != null">
+                AND created_at &gt;= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND created_at &lt;= #{endDate}
+            </if>
+        </where>
+        GROUP BY TO_CHAR(created_at, 'YYYY')
+        ORDER BY TO_CHAR(created_at, 'YYYY')
+    </select>
+    <select id="getSearchPlantLogByDate"
+            parameterType="String"
+            resultType="com.ggirick.gardening_admin_backend.dto.plant.PlantSearchRequestLogDTO">
+        SELECT l.LOG_ID,
+               l.USER_UID,
+               i.NICKNAME,
+               l.MATCHED_SCIENTIFIC_NAME,
+               l.CREATED_AT,
+               p.common_name,
+            f.URL
+        FROM PLANT_SEARCH_REQUEST_LOG l
+                 LEFT JOIN USER_INFO i ON l.USER_UID = i.uuid
+                 LEFT JOIN PLANT_SEARCH_REQUEST_FILE f ON l.LOG_ID = f.LOG_ID
+                 LEFT JOIN PLANT_INFO p ON l.MATCHED_SCIENTIFIC_NAME = p.SCIENTIFIC_NAME
+        WHERE TRUNC(l.CREATED_AT) = TO_DATE(#{ date}, 'YYYY-MM-DD')
+        ORDER BY l.CREATED_AT DESC
+    </select>
+</mapper>
