@@ -29,7 +29,7 @@ export const dataProvider: DataProvider = {
             "users 0-0/0";
 
         const total = Number(contentRange.split("/").pop() ?? 0);
-
+    console.log(data);
         return {
             data,
             total,
@@ -48,7 +48,7 @@ export const dataProvider: DataProvider = {
 
 
         };
-
+            console.log(data);
 
         return { data };
 
@@ -59,11 +59,11 @@ export const dataProvider: DataProvider = {
 // 3) 여러개 조회 (GET /resource?filter={id:[]})
 // ----------------------------------------------------
     getMany: async (resource, params) => {
-        const url = `/${resource}?filter=${encodeURIComponent(
-            JSON.stringify({ id: params.ids })
-        )}`;
+        const filter = encodeURIComponent(JSON.stringify({ id: params.ids }));
+        const url = `/${resource}/batch?filter=${filter}`;
 
         const res = await axiosInterceptor.get(url);
+        console.log(res.data);
         return { data: res.data };
     },
 
@@ -91,6 +91,7 @@ export const dataProvider: DataProvider = {
         const data = res.data.map((item: any) => ({
             ...item,
         }));
+        console.log(data);
 
         const contentRange =
             res.headers["content-range"] ||
@@ -109,10 +110,12 @@ export const dataProvider: DataProvider = {
     // 5) update (PUT /resource/:id)
     // ----------------------------------------------------
     update: async (resource, params) => {
+        console.log(params.data);
         const res = await axiosInterceptor.put(
             `${resource}/${params.id}`,
             params.data
         );
+
         return { data: res.data };
     },
 

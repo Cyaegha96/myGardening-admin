@@ -7,13 +7,13 @@ import {
     DateField,
     Show,
     RecordField,
-    DateInput, SelectInput,
+    DateInput, SelectInput, SimpleFormIterator, ArrayInput,
 } from "@/shared/shadcn/components/admin";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/shadcn/components/ui/tabs";
 import { Edit} from "@/shared/shadcn/components/admin/edit";
 import { Badge } from "@/shared/shadcn/components/ui/badge";
 import type {UserAdminViewDTO} from "@/entities/users/UserAdminViewDTO.tsx";
-import {required} from "ra-core";
+import {required, useGetIdentity, useGetList} from "ra-core";
 import {CustomEditActions} from "@/features/CustomEditActions.tsx";
 import {FileUploadInput} from "@/widgets/FileUploadInput.tsx";
 
@@ -76,6 +76,19 @@ export const UserList = (props: any) => (
 
                             return <Badge variant={variant}>{label}</Badge>;
                         }}
+                    />
+                    <DataTable.Col source="roles"
+                                   label="권한"
+                                 render={(record) => (
+                                     <div style={{display: "flex", gap: "8px"}}>
+                                         {record.roles?.map((role: any) => (
+                                             <span key={role.roleId}
+                                                   style={{padding: "4px 8px", background: "#eee", borderRadius: "12px"}}>
+                             {role.roleName}
+                         </span>
+                                         ))}
+                                     </div>
+                                 )}
                     />
                     <DataTable.Col
                         source="createdAt"
@@ -154,6 +167,18 @@ export const UserShow = () => (
         <div className="flex flex-col gap-4">
             <RecordField source="id" />
             <RecordField source="status" />
+            <RecordField source="roles"
+                         render={(record) => (
+                             <div style={{display: "flex", gap: "8px"}}>
+                                 {record.roles?.map((role: any) => (
+                                     <span key={role.roleId}
+                                           style={{padding: "4px 8px", background: "#eee", borderRadius: "12px"}}>
+                             {role.roleName}
+                         </span>
+                                 ))}
+                             </div>
+                         )}
+            />
             <RecordField source="createdAt">
                 <DateField source="createdAt" showTime />
             </RecordField>
@@ -185,15 +210,35 @@ export const UserShow = () => (
 
             </RecordField>
             <RecordField source="birthDate" />
-            <RecordField source="roles" />
 
         </div>
     </Show>
 );
 
 
+const RoleSelectInput = (props) => {
+    const { data, isLoading } = useGetList('roles'); // GET /roles 호출
 
-export const UserEdit = () => (
+    if (isLoading) return <span>Loading...</span>;
+
+    return (
+        <SelectInput
+            {...props}
+            source="roleId"
+            label="Role"
+            optionValue="roleId"
+            optionText="roleName"
+            choices={data}
+        />
+
+    );
+};
+
+
+export const UserEdit = () => {
+
+
+  return(
     <Edit actions={<CustomEditActions resource="users" />} >
         <SimpleForm>
 
@@ -207,6 +252,13 @@ export const UserEdit = () => (
                     { id: 'BLOCKED', name: '블랙리스트 (BLOCKED)' },
                 ]}
             />
+            <ArrayInput source="roles">
+                <SimpleFormIterator>
+                    <RoleSelectInput/>
+
+                </SimpleFormIterator>
+            </ArrayInput>
+
 
             <TextInput source="provider" disabled />
             <TextInput source="userId" disabled />
@@ -228,4 +280,6 @@ export const UserEdit = () => (
 
         </SimpleForm>
     </Edit>
-);
+)
+}
+

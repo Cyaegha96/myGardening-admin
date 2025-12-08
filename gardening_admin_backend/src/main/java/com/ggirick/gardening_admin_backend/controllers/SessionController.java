@@ -1,6 +1,7 @@
 package com.ggirick.gardening_admin_backend.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ggirick.gardening_admin_backend.dto.session.ActiveSessionDTO;
 import com.ggirick.gardening_admin_backend.services.RedisService;
 import com.ggirick.gardening_admin_backend.services.SessionService;
@@ -22,6 +23,7 @@ public class SessionController {
 
     private final SessionService sessionService;
     private final RedisService redisService;
+    private final ObjectMapper objectMapper;
 
     @GetMapping
     public List<ActiveSessionDTO> getActiveSessions(
@@ -31,8 +33,17 @@ public class SessionController {
             HttpServletResponse response
     ) throws JsonProcessingException {
         List<ActiveSessionDTO> sessions = sessionService.getActiveSessions(100);
+        int start = 0;
+        int end = sessions.size() - 1;
 
-        response.setHeader("Content-Range", "sessions 0-" + (sessions.size()-1) + "/" + sessions.size());
+        if (range != null) {
+            int[] r = objectMapper.readValue(range, int[].class);
+            start = r[0];
+            end = Math.min(r[1], sessions.size() - 1);
+            sessions = sessions.subList(start, end + 1);
+        }
+        response.setHeader("Content-Range",
+                "sessions " + start + "-" + end + "/" + sessions.size());
         response.setHeader("Access-Control-Expose-Headers", "Content-Range");
 
         return sessions;

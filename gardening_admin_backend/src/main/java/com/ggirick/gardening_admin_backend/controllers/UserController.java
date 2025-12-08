@@ -2,6 +2,7 @@ package com.ggirick.gardening_admin_backend.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import com.ggirick.gardening_admin_backend.dto.auth.UserTokenDTO;
 import com.ggirick.gardening_admin_backend.dto.user.UsersDomainDTO;
 
 import com.ggirick.gardening_admin_backend.services.UsersDomainService;
@@ -9,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -53,11 +55,12 @@ public class UserController {
 
     @PutMapping("/{id}")
     public UsersDomainDTO updateUser(
+            @AuthenticationPrincipal UserTokenDTO userTokenDTO,
             @PathVariable("id") String uuid,
             @RequestBody UsersDomainDTO dto
     ) {
         dto.setId(uuid);
-        return usersDomainService.updateUser( dto);
+        return usersDomainService.updateUser( dto, userTokenDTO.getUid());
     }
 
     @DeleteMapping("/{id}")
@@ -74,10 +77,11 @@ public class UserController {
 
     @PutMapping
     public List<UsersDomainDTO> updateMany(
+            @AuthenticationPrincipal UserTokenDTO userTokenDTO,
             @RequestParam(required = false) String filter,
             @RequestBody UsersDomainDTO dto
     ) throws JsonProcessingException {
-        return usersDomainService.updateMany(filter, dto);
+        return usersDomainService.updateMany(filter, dto, userTokenDTO.getUid());
     }
 
     @DeleteMapping

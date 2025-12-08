@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import {useEffect,  useState} from "react";
 import {
     Card,
     CardContent,
@@ -10,12 +10,15 @@ import { UserStatsChart } from "@/features/dashboard/UserStatsChart.tsx";
 import axiosInterceptor from "@/shared/api/axiosInterceptor.ts";
 import {Button} from "@/shared/shadcn/components/ui/button.tsx";
 import {Badge} from "@/shared/shadcn/components/ui/badge.tsx";
+import {RecordContextProvider, ResourceContextProvider} from "ra-core";
+import {ReferenceField, TextField} from "@/shared/shadcn/components/admin";
 
 const LOGS_PER_PAGE = 5; // 한 페이지에 표시할 로그 수
 
 export const PlantNetQuotaCard = () => {
     const [quota, setQuota] = useState<{ count: number; total: number; remaining: number } | null>(null);
-    const [logs, setLogs] = useState<{ nickname: string; matchedScientificName: string; url?: string; commonName: string }[]>([]);
+    const [logs, setLogs] = useState<{ nickname: string; matchedScientificName: string; url?: string; commonName: string , userUid:string}[]>([]);
+
     const [selectedDate, setSelectedDate] = useState(() => {
         const today = new Date();
         return today.toISOString().split("T")[0]; // YYYY-MM-DD
@@ -46,6 +49,7 @@ export const PlantNetQuotaCard = () => {
             });
             const filteredLogs = res.data.map((log: any) => ({
                 nickname: log.nickname,
+                userUid:log.userUid,
                 matchedScientificName: log.matchedScientificName,
                 url: log.url,
                 commonName: log.commonName,
@@ -102,9 +106,11 @@ export const PlantNetQuotaCard = () => {
                     {loadingLogs && <p className="text-sm text-gray-500">로그 불러오는 중...</p>}
                     {!loadingLogs && logs.length === 0 && <p className="text-sm text-gray-500">해당 날짜 로그 없음</p>}
                     {!loadingLogs && logs.length > 0 && (
+
                         <>
                             <div className="space-y-2">
-                                {paginatedLogs.map((log, idx) => (
+                                {paginatedLogs.map((log, idx) => {
+                                    return (
                                     <div
                                         key={idx}
                                         className="flex items-center gap-4 p-2 bg-white border rounded shadow-sm hover:shadow-md transition-shadow"
@@ -120,18 +126,32 @@ export const PlantNetQuotaCard = () => {
 
                                         {/* 텍스트 */}
                                         <div className="flex-1">
-                                            <p className="text-sm font-medium text-gray-800">
-                                                <Badge variant="secondary">{log.nickname}</Badge>
-                                            </p>
-                                            <p  className="text-sm font-medium text-gray-800">
-                                                {log.matchedScientificName}
-                                            </p>
-                                            {log.commonName && (
-                                                <p className="text-sm text-gray-500">{log.commonName}</p>
-                                            )}
+                                            <ResourceContextProvider value="users">
+                                                <RecordContextProvider value={log}>
+                                                    <ReferenceField source="userUid" reference="users" link="show">
+                                                        <Badge variant="secondary">
+                                                            <TextField source="nickname" />
+                                                        </Badge>
+                                                    </ReferenceField>
+                                                </RecordContextProvider>
+                                            </ResourceContextProvider>
+
+                                            <ResourceContextProvider value="plants">
+                                                <RecordContextProvider value={log}>
+                                                    <ReferenceField
+                                                        source="matchedScientificName"
+                                                        reference="plants"
+                                                        link="show"
+                                                    >
+                                                        <TextField source="scientificName" />
+                                                        <p className="text-sm text-gray-500"> <TextField source="commonName" /></p>
+                                                    </ReferenceField>
+                                                </RecordContextProvider>
+                                            </ResourceContextProvider>
+
                                         </div>
                                     </div>
-                                ))}
+                                    ) })}
                             </div>
 
                             {/* 페이지네이션 버튼 */}

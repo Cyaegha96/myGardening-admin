@@ -233,4 +233,26 @@
                  JOIN role r ON ur.ROLE_ID = r.ROLE_ID
         WHERE ur.USER_UID = #{userUid}
     </select>
+    <resultMap id="UserRoleDTOMap" type="com.ggirick.gardening_admin_backend.dto.auth.UserRoleDTO">
+        <result property="userUid" column="USER_UID"/>
+        <result property="roleId" column="ROLE_ID"/>
+        <result property="assignedBy" column="ASSIGNED_BY"/>
+        <result property="assignedAt" column="ASSIGNED_AT"/>
+        <result property="roleName" column="ROLE_NAME"/>
+    </resultMap>
+
+    <!-- getRoles 메서드 -->
+    <select id="getRoles" parameterType="string" resultMap="UserRoleDTOMap">
+        SELECT
+            ur.USER_UID,
+            ur.ROLE_ID,
+            ur.ASSIGNED_BY,
+            ur.ASSIGNED_AT,
+            r.ROLE_NAME
+        FROM user_role ur
+                 INNER JOIN role r
+                            ON ur.ROLE_ID = r.ROLE_ID
+        WHERE ur.USER_UID = #{userId}
+    </select>
+
 </mapper>

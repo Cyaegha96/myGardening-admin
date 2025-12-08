@@ -1,6 +1,6 @@
 import {
     DateField,
-    NumberField,Show,TextField,
+    NumberField, ReferenceField, Show, TextField,
 
 } from "@/shared/shadcn/components/admin";
 
@@ -32,7 +32,12 @@ const BoardShowContent = () => {
                 <CardContent className="space-y-4">
                     {/* 작성자/작성일/조회수 */}
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>작성자: <TextField source="nickname" /></span>
+                        <span>작성자:</span>
+                        <ReferenceField source="writerUid" reference="users" link="show">
+                            <TextField source="nickname" />
+                        </ReferenceField>
+
+
                         <Separator orientation="vertical" />
                         <span><DateField source="createdAt" /></span>
                         <Separator orientation="vertical" />
@@ -138,7 +143,10 @@ const CommentItem = ({ comment, depth }: { comment: any; depth: number }) => {
         >
             {/* 상단: 작성자 + 날짜 */}
             <div className="flex items-center justify-between mb-1">
-                <span className="font-medium">{comment.nickname}</span>
+                <ReferenceField record={comment} source="writerUid" reference="users" link="show">
+                    <TextField source="nickname" />
+                </ReferenceField>
+
                 <DateField record={comment} source="createdAt" className="text-sm" />
             </div>
 

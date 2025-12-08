@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ggirick.gardening_admin_backend.mappers.user.RoleMapper">
+    <resultMap id="RoleDTOMap" type="com.ggirick.gardening_admin_backend.dto.user.RoleDTO">
+        <id property="id" column="ROLE_ID"/>
+        <result property="roleName" column="ROLE_NAME"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="updatedAt" column="UPDATED_AT"/>
+    </resultMap>
+
+    <select id="getAllRoles" resultMap="RoleDTOMap">
+        SELECT ROLE_ID, ROLE_NAME, DESCRIPTION, CREATED_AT, UPDATED_AT
+        FROM role
+        ORDER BY ROLE_ID
+    </select>
+    <select id="getRolesByUserUid" parameterType="string" resultMap="UserRoleDTOMap">
+        SELECT ur.USER_UID,
+               ur.ROLE_ID,
+               ur.ASSIGNED_BY,
+               ur.ASSIGNED_AT,
+               r.ROLE_NAME
+        FROM user_role ur
+                 INNER JOIN role r ON ur.ROLE_ID = r.ROLE_ID
+        WHERE ur.USER_UID = #{userUid}
+    </select>
+
+    <!-- 역할 추가 -->
+    <insert id="insertUserRole" parameterType="com.ggirick.gardening_admin_backend.dto.auth.UserRoleDTO">
+        INSERT INTO user_role (USER_UID, ROLE_ID, ASSIGNED_BY, ASSIGNED_AT)
+        VALUES (#{userUid}, #{roleId}, #{assignedBy},  SYSTIMESTAMP)
+    </insert>
+
+    <!-- 역할 수정 -->
+    <update id="updateUserRole" parameterType="com.ggirick.gardening_admin_backend.dto.auth.UserRoleDTO">
+        UPDATE user_role
+        SET ASSIGNED_BY = #{assignedBy},
+            ASSIGNED_AT =  SYSTIMESTAMP
+        WHERE USER_UID = #{userUid}
+          AND ROLE_ID = #{roleId}
+    </update>
+
+    <!-- 역할 삭제 -->
+    <delete id="deleteUserRole" parameterType="com.ggirick.gardening_admin_backend.dto.auth.UserRoleDTO">
+        DELETE FROM user_role
+        WHERE USER_UID = #{userUid}
+          AND ROLE_ID = #{roleId}
+    </delete>
+
+    <!-- ResultMap -->
+    <resultMap id="UserRoleDTOMap" type="com.ggirick.gardening_admin_backend.dto.auth.UserRoleDTO">
+        <result property="userUid" column="USER_UID"/>
+        <result property="roleId" column="ROLE_ID"/>
+        <result property="assignedBy" column="ASSIGNED_BY"/>
+        <result property="assignedAt" column="ASSIGNED_AT"/>
+        <result property="roleName" column="ROLE_NAME"/>
+    </resultMap>
+    <select id="getRolesByUserUids" parameterType="list" resultMap="UserRoleDTOMap">
+        SELECT ur.USER_UID,
+        ur.ROLE_ID,
+        ur.ASSIGNED_BY,
+        ur.ASSIGNED_AT,
+        r.ROLE_NAME
+        FROM user_role ur
+        INNER JOIN role r ON ur.ROLE_ID = r.ROLE_ID
+        WHERE ur.USER_UID IN
+        <foreach item="userUid" collection="list" open="(" separator="," close=")">
+            #{userUid}
+        </foreach>
+    </select>
+
+
+</mapper>

@@ -111,13 +111,8 @@ public class PlantInfoService {
     }
     public List<PlantInfoDTO> getMany(String filter) throws JsonProcessingException {
 
-        Map<String, Object> filterMap =
-                (filter != null && !filter.isEmpty())
-                        ? mapper.readValue(filter, Map.class)
-                        : Collections.emptyMap();
-
-        List<String> ids = (List<String>) filterMap.get("id");
-        if (ids == null || ids.isEmpty()) return Collections.emptyList();
+        Map<String, Object> filters = parseFilter(filter);
+        List<String> ids = (List<String>) filters.get("id");
 
         return plantInfoMapper.findMany(ids);
     }
@@ -137,5 +132,13 @@ public class PlantInfoService {
 
     public PlantInfoDTO getPlant(String scientificName) {
         return plantInfoMapper.selectOne(scientificName);
+    }
+
+    private Map<String, Object> parseFilter(String filter)
+            throws JsonProcessingException {
+
+        if (filter == null) return new HashMap<>();
+
+        return mapper.readValue(filter, new TypeReference<>() {});
     }
 }

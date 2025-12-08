@@ -259,6 +259,10 @@ public class RedisService {
         return result;
     }
 
+    public boolean isSessionValid(String sessionId) {
+        if (sessionId == null || sessionId.isEmpty()) return false;
+        return redis.hasKey("session:" + sessionId);
+    }
 
 
 }

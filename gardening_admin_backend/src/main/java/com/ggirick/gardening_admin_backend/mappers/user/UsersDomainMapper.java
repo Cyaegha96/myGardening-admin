@@ -1,5 +1,6 @@
 package com.ggirick.gardening_admin_backend.mappers.user;
 
+import com.ggirick.gardening_admin_backend.dto.auth.UserRoleDTO;
 import com.ggirick.gardening_admin_backend.dto.user.UsersDomainDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -30,4 +31,6 @@ public interface UsersDomainMapper {
     //여기서 ids 는 uuid를 담고 있습니다.
     List<UsersDomainDTO> findUsersByIds(@Param("ids") List<String> ids);
     void insertUser(UsersDomainDTO dto);
+
+    List<UserRoleDTO> getRoles(@Param("userId") String userId);
 }

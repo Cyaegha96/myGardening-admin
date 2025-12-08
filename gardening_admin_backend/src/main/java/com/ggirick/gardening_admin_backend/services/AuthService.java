@@ -76,7 +76,7 @@ public class AuthService {
                 .build();
         String sessionId = UUID.randomUUID().toString();
         //  Access Token 및 Refresh Token 발급
-        String accessToken = jwtUtil.createAccessToken(userInfo);
+        String accessToken = jwtUtil.createAccessToken(userInfo,sessionId );
         String refreshToken = jwtUtil.createRefreshToken(userInfo);
 
         // user_session 테이블에 Refresh Token 기록
@@ -102,7 +102,7 @@ public class AuthService {
         log.debug("새 세션 {}", newSession.getSessionId());
 
         //세션 시간은 accessToken 만료 시간과 동일
-        long ttlMillis = accessExpDate.getTime() - System.currentTimeMillis();
+        long ttlMillis = refreshExpDate.getTime() - System.currentTimeMillis();
         if (ttlMillis <= 0) {
             // 토큰 만료면 예외
             throw new AuthenticationException("생성된 Access Token 만료시간이 유효하지 않습니다.");
@@ -161,7 +161,7 @@ public class AuthService {
         //새로운 Access Token 및 Refresh Token 발급
 
         UserTokenDTO userInfo = UserTokenDTO.builder().uid(uid).provider(provider).build();
-        String newAccessToken = jwtUtil.createAccessToken(userInfo);
+        String newAccessToken = jwtUtil.createAccessToken(userInfo,oldSessionId  );
         String newRefreshToken = jwtUtil.createRefreshToken(userInfo);
 
         Date refreshExpDate = jwtUtil.getRefreshTokenExpirationDate();
@@ -189,7 +189,7 @@ public class AuthService {
 
         //Redis: 새 refreshToken 키 저장, TTL 설정
 
-        long newTtlMillis = accessExpDate.getTime() - System.currentTimeMillis();
+        long newTtlMillis = refreshExpDate.getTime() - System.currentTimeMillis();
         redisService.deleteSession(refreshToken);
         redisService.saveSession(uid, updateSession.getSessionId(), newRefreshToken, newRedisValue, newTtlMillis);
         return new TokenPair(newAccessToken, newRefreshToken);
@@ -227,12 +227,13 @@ public class AuthService {
 
 
     public TokenPair issueTokenForOAuth(UserTokenDTO userInfo, String ipAddress) {
-        String accessToken = jwtUtil.createAccessToken(userInfo);
+        String sessionId = UUID.randomUUID().toString();
+        String accessToken = jwtUtil.createAccessToken(userInfo,sessionId);
         String refreshToken = jwtUtil.createRefreshToken(userInfo);
         Date accessExpDate = jwtUtil.getAccessTokenExpirationDate();
         Date refreshExpDate = jwtUtil.getRefreshTokenExpirationDate();
 
-        String sessionId = UUID.randomUUID().toString();
+
 
         // 1) DB에 세션 기록
         UserSessionDTO newSession = UserSessionDTO.builder()
@@ -259,7 +260,7 @@ public class AuthService {
         authMapper.insertLoginHistory(loginHistory);
 
         // 2) Redis에 세션 저장
-        long ttlMillis = accessExpDate.getTime() - System.currentTimeMillis();
+        long ttlMillis = refreshExpDate.getTime() - System.currentTimeMillis();
         Map<String, Object> redisValue = new HashMap<>();
         redisValue.put("uid", userInfo.getUid());
         redisValue.put("provider", userInfo.getProvider());
