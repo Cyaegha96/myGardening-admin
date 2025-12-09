@@ -26,4 +26,6 @@ public interface BoardMapper {
     void updateBoard(BoardDTO boardDTO);
 
     BoardDTO deleteBoard(int id);
+
+    List<BoardDTO> findBoardsByIds(@Param("ids") List<Integer> ids);
 }

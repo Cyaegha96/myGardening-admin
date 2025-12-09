@@ -92,6 +92,14 @@ public class BoardService {
 
         return board;
     }
+    /* 여러개 조회*/
+    public List<BoardDTO> getMany(String filter)  throws JsonProcessingException {
+
+        Map<String, Object> filters = parseFilter(filter);
+        List<Integer> ids = (List<Integer>) filters.get("id");
+
+        return boardMapper.findBoardsByIds(ids);
+    }
 
     public BoardDTO updateBoard(BoardDTO boardDTO) {
         boardDTO.setStatus(boardDTO.getStatus().toLowerCase(Locale.ROOT));
@@ -102,6 +110,14 @@ public class BoardService {
     public BoardDTO deleteBoard(int id) {
         return boardMapper.deleteBoard(id);
 
+    }
+
+    private Map<String, Object> parseFilter(String filter)
+            throws JsonProcessingException {
+
+        if (filter == null) return new HashMap<>();
+
+        return mapper.readValue(filter, new TypeReference<>() {});
     }
 
 }

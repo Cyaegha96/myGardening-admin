@@ -140,5 +140,27 @@
             UPDATED_AT = CURRENT_TIMESTAMP
         WHERE ID = #{id}
     </update>
+    <select id="findBoardsByIds"
+            parameterType="list"
+            resultType="com.ggirick.gardening_admin_backend.dto.board.BoardDTO">
+
+        SELECT
+        b.id,
+        b.title,
+        b.writer_uid,
+        i.nickname,
+        b.contents,
+        b.is_notification,
+        b.status,
+        b.view_count,
+        b.created_at,
+        b.updated_at
+        FROM board b
+        LEFT JOIN user_info i ON b.WRITER_UID = i.uuid
+        WHERE b.id IN
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
 
 </mapper>

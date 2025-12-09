@@ -49,6 +49,11 @@ public class BoardController {
         return boardService.getBoard(id);
     }
 
+    @GetMapping("/batch")
+    public List<BoardDTO> getBoards(@RequestParam(required = false)  String filter)  throws JsonProcessingException {
+        return boardService.getMany(filter);
+    }
+
     @PutMapping("/{id}")
     public BoardDTO updateBoard(@PathVariable("id") int id, @RequestBody BoardDTO boardDTO) throws  JsonProcessingException {
         boardDTO.setId(id);
