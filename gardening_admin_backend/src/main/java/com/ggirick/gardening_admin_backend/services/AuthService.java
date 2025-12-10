@@ -2,14 +2,7 @@ package com.ggirick.gardening_admin_backend.services;
 
 import com.auth0.jwt.exceptions.TokenExpiredException;
 
-import com.ggirick.gardening_admin_backend.dto.auth.AuthDTO;
-import com.ggirick.gardening_admin_backend.dto.auth.TokenPair;
-import com.ggirick.gardening_admin_backend.dto.auth.UserSessionDTO;
-import com.ggirick.gardening_admin_backend.dto.auth.UserTokenDTO;
-import com.ggirick.gardening_admin_backend.dto.auth.LoginHistoryDTO;
-import com.ggirick.gardening_admin_backend.dto.auth.LogoutRequestDTO;
-import com.ggirick.gardening_admin_backend.dto.auth.UserInfoDTO;
-import com.ggirick.gardening_admin_backend.dto.auth.UserRoleDTO;
+import com.ggirick.gardening_admin_backend.dto.auth.*;
 import com.ggirick.gardening_admin_backend.exceptions.AuthenticationException;
 import com.ggirick.gardening_admin_backend.mappers.auth.AuthMapper;
 import com.ggirick.gardening_admin_backend.mappers.auth.UserMapper;
@@ -66,6 +59,17 @@ public class AuthService {
         if (!passwordEncoder.matches(rawPassword, authInfo.getPw())) {
             // 비밀번호 불일치
             throw new AuthenticationException("비밀번호가 일치하지 않습니다.");
+        }
+
+        UsersDTO usersDTO = userMapper.selectUserByUid(authInfo.getUserUid());
+
+
+        if ("BLOCKED".equals(usersDTO.getStatus())) {
+            throw new AuthenticationException("계정이 차단되었습니다.");
+        }
+
+        if (!"ACTIVE".equals(usersDTO.getStatus())) {
+            throw new AuthenticationException("로그인 불가: 계정이 비활성화 상태입니다.");
         }
 
         //  토큰 생성을 위한 DTO 구성

@@ -5,7 +5,10 @@ import { Button } from "@/shared/shadcn/components/ui/button.tsx";
 import { TextInput } from "@/shared/shadcn/components/admin/text-input.tsx";
 import { Notification } from "@/shared/shadcn/components/admin/notification.tsx";
 import { useNavigate} from "react-router";
+import loginBg from '@/shared/assets/background/login-bg.jpg';
 
+import logo from "@/shared/assets/logo/myGardeningText.png";
+import logoImage from '@/shared/assets/logo/myGardening.svg';
 export const LoginPage = (props: { redirectTo?: string }) => {
     const navigate = useNavigate();
     const { redirectTo } = props;
@@ -56,15 +59,16 @@ export const LoginPage = (props: { redirectTo?: string }) => {
                     <div
                         className="absolute inset-0 bg-cover bg-center"
                         style={{
-                            backgroundImage: "url('/src/shared/assets/background/login-bg.jpg')",
+                            backgroundImage: `url(${loginBg})`,
+
                         }}
                     >
                         {/* 바네팅 오버레이 */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/60" />
                     </div>
                     <div className="relative z-20 flex items-center text-lg font-medium">
-                        <img src="src/shared/assets/logo/myGardening.svg" className="mr-2 mt-2 h-8 w-8"  alt="로고 이미지"/>
-                        <img src="src/shared/assets/logo/myGardeningText.png"  className="mr-2 h-8 " alt="로고 텍스트" />
+                        <img src={logoImage } className="mr-2 mt-2 h-8 w-8"  alt="로고 이미지"/>
+                        <img src={logo}  className="mr-2 h-8 " alt="로고 텍스트" />
                     </div>
                     <div className="relative z-20 mt-auto">
                         <blockquote className="space-y-2">

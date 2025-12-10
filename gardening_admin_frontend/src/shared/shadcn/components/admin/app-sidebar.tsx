@@ -22,7 +22,8 @@ import {
 } from "@/shared/shadcn/components/ui/sidebar";
 import { Skeleton } from "@/shared/shadcn/components/ui/skeleton";
 import { House, List } from "lucide-react";
-
+import logo from "@/shared/assets/logo/myGardeningText.png";
+import logoImage from '@/shared/assets/logo/myGardening.svg';
 export function AppSidebar() {
   const hasDashboard = useHasDashboard();
   const resources = useResourceDefinitions();
@@ -42,8 +43,8 @@ export function AppSidebar() {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <Link to="/">
-                  <img src="src/shared/assets/logo/myGardening.svg" className="mr-2 mt-2 h-8 w-8"  alt="로고 이미지"/>
-                  <img src="src/shared/assets/logo/myGardeningText.png"  className="mr-2 h-8 " alt="로고 텍스트" />
+                  <img src={logoImage} className="mr-2 mt-2 h-8 w-8"  alt="로고 이미지"/>
+                  <img src={logo} className="mr-2 h-8 " alt="로고 텍스트" />
 
               </Link>
             </SidebarMenuButton>

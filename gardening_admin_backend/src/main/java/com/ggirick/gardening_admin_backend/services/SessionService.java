@@ -1,10 +1,10 @@
 package com.ggirick.gardening_admin_backend.services;
 
+import com.ggirick.gardening_admin_backend.dto.auth.UserInfoDTO;
 import com.ggirick.gardening_admin_backend.dto.session.ActiveSessionDTO;
 import com.ggirick.gardening_admin_backend.mappers.auth.UserMapper;
 import com.ggirick.gardening_admin_backend.mappers.auth.UserSessionMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,16 +31,22 @@ public class SessionService {
             String ip = (String) session.get("ip");
 
             // uid -> nickname 조회
-            String nickname = userMapper.selectUserInfoByUid(uid).getNickname();
+            UserInfoDTO userInfoDTO = userMapper.selectUserInfoByUid(uid);
+            if(userInfoDTO != null){
+                String nickname = userInfoDTO.getNickname();
+                result.add(ActiveSessionDTO.builder()
+                        .id(sessionId)
+                        .uid(uid)
+                        .nickname(nickname)
+                        .provider(provider)
+                        .ip(ip)
+                        .build()
+                );
+            }
 
-            result.add(ActiveSessionDTO.builder()
-                    .id(sessionId)
-                    .uid(uid)
-                    .nickname(nickname)
-                    .provider(provider)
-                    .ip(ip)
-                    .build()
-            );
+
+
+
         }
 
         return result;

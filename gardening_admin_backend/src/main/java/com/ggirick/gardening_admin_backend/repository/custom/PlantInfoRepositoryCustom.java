@@ -1,7 +1,6 @@
 package com.ggirick.gardening_admin_backend.repository.custom;
 
 import com.ggirick.gardening_admin_backend.entity.report.PlantInfoRequest;
-import com.ggirick.gardening_admin_backend.entity.report.Report;
 
 import java.util.List;
 

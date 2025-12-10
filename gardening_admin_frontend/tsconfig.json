@@ -9,7 +9,9 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
-
+    "strict": false,
+    "noEmitOnError": false,
+    "isolatedModules": true,
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./*"],

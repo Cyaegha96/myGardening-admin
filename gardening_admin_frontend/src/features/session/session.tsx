@@ -15,8 +15,10 @@ export const SessionList = () => (
             <DataTable.Col source="ip" />
             <DataTable.Col
                 label="Actions"
-                render={(record) => (
-                    <DeleteButton resource="sessions" record={record} mutationMode="pessimistic" />
+                render={() => (
+                    <DeleteButton resource="sessions"
+                                  // record={record} mutationMode="pessimistic"
+                    />
                 )}
             />
         </DataTable>

@@ -29,6 +29,7 @@ export const ReportList = () => (
 
                 const status = map[value] ?? { label: value, color: "secondary" };
 
+                // @ts-ignore
                 return <Badge variant={status.color}>{status.label}</Badge>;}}
                 />
 

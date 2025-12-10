@@ -1,5 +1,5 @@
 
-import {Admin, ListGuesser,} from "@/shared/shadcn/components/admin";
+import {Admin, } from "@/shared/shadcn/components/admin";
 import {authProvider} from "@/app/providers/authProvider.ts";
 import {dataProvider} from "@/app/providers/mygardeningProvider.ts";
 import {LoginPage} from "@/pages/home/LoginPage.tsx";
@@ -19,6 +19,8 @@ import {PlantinforequestList} from "@/features/report/PlantInfoRequestList.tsx";
 import {PlantinforequestShow} from "@/features/report/PlantInfoRequestShow.tsx";
 import {PlantinforequestEdit} from "@/features/report/PlantInfoRequestEdit.tsx";
 import {PotlistingreportList} from "@/features/report/PotListingReportList.tsx";
+import {PotListingReportShow} from "@/features/report/PotListingReportShow.tsx";
+import {PotlistingreportEdit} from "@/features/report/PotListingReportEdit.tsx";
 
 function App() {
 
@@ -75,7 +77,8 @@ function App() {
           <Resource
               name="potlistingreport"
               list={PotlistingreportList}
-
+              show={PotListingReportShow}
+              edit={PotlistingreportEdit}
           />
       </Admin>
   )

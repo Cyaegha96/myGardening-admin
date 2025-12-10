@@ -13,30 +13,33 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/shadcn/compon
 import { Edit} from "@/shared/shadcn/components/admin/edit";
 import { Badge } from "@/shared/shadcn/components/ui/badge";
 import type {UserAdminViewDTO} from "@/entities/users/UserAdminViewDTO.tsx";
-import {required, useGetIdentity, useGetList} from "ra-core";
+import {required,  useGetList, type ChoicesProps, type InputProps} from "ra-core";
 import {CustomEditActions} from "@/features/CustomEditActions.tsx";
 import {FileUploadInput} from "@/widgets/FileUploadInput.tsx";
+import type {SupportCreateSuggestionOptions} from "@/hooks/useSupportCreateSuggestion";
+import type {ReactElement, DetailedHTMLProps, HTMLAttributes} from "react";
+import type {JSX} from "react/jsx-runtime";
 
 
 const userFilters = [
-    <TextInput key="email" source="email" label="이메일 검색" />,
-    <TextInput key="name" source="name" label="이름 검색" />,
-    <TextInput key="nickname" source="nickname" label="닉네임 검색" />,
+    <TextInput key="email" source="email" label="이메일 검색"/>,
+    <TextInput key="name" source="name" label="이름 검색"/>,
+    <TextInput key="nickname" source="nickname" label="닉네임 검색"/>,
     <SelectInput
         key="status"
         source="status"
         label="가입 상태"
         choices={[
-            { id: 'ACTIVE', name: '활성' },
-            { id: 'INACTIVE', name: '탈퇴' },
-            { id: 'BLOCKED', name: '차단' },
+            {id: 'ACTIVE', name: '활성'},
+            {id: 'INACTIVE', name: '탈퇴'},
+            {id: 'BLOCKED', name: '차단'},
         ]}
     />,
 
 ];
 
 export const UserList = (props: any) => (
-    <List {...props}  filters={userFilters}>
+    <List {...props} filters={userFilters}>
         <Tabs defaultValue="account" className="w-full">
             <TabsList>
                 <TabsTrigger value="account">계정 정보</TabsTrigger>
@@ -46,10 +49,10 @@ export const UserList = (props: any) => (
 
             <TabsContent value="account">
                 <DataTable<UserAdminViewDTO>>
-                    <DataTable.Col source="id" label="UUID" />
-                    <DataTable.Col source="userId" label="아이디" />
-                    <DataTable.Col source="providerUserId" label="oauth2아이디" />
-                    <DataTable.Col source="provider" label="로그인 제공자" />
+                    <DataTable.Col source="id" label="UUID"/>
+                    <DataTable.Col source="userId" label="아이디"/>
+                    <DataTable.Col source="providerUserId" label="oauth2아이디"/>
+                    <DataTable.Col source="provider" label="로그인 제공자"/>
                     <DataTable.Col
                         source="status"
                         label="가입 상태"
@@ -79,16 +82,20 @@ export const UserList = (props: any) => (
                     />
                     <DataTable.Col source="roles"
                                    label="권한"
-                                 render={(record) => (
-                                     <div style={{display: "flex", gap: "8px"}}>
-                                         {record.roles?.map((role: any) => (
-                                             <span key={role.roleId}
-                                                   style={{padding: "4px 8px", background: "#eee", borderRadius: "12px"}}>
+                                   render={(record) => (
+                                       <div style={{display: "flex", gap: "8px"}}>
+                                           {record.roles?.map((role: any) => (
+                                               <span key={role.roleId}
+                                                     style={{
+                                                         padding: "4px 8px",
+                                                         background: "#eee",
+                                                         borderRadius: "12px"
+                                                     }}>
                              {role.roleName}
                          </span>
-                                         ))}
-                                     </div>
-                                 )}
+                                           ))}
+                                       </div>
+                                   )}
                     />
                     <DataTable.Col
                         source="createdAt"
@@ -129,15 +136,15 @@ export const UserList = (props: any) => (
 
             <TabsContent value="info">
                 <DataTable<UserAdminViewDTO>>
-                    <DataTable.Col source="id" label="UUID" />
-                    <DataTable.Col source="name" label="이름" />
-                    <DataTable.Col source="nickname" label="닉네임" />
-                    <DataTable.Col source="bio" label="소개" />
+                    <DataTable.Col source="id" label="UUID"/>
+                    <DataTable.Col source="name" label="이름"/>
+                    <DataTable.Col source="nickname" label="닉네임"/>
+                    <DataTable.Col source="bio" label="소개"/>
                     <DataTable.Col
                         source="profileUrl"
                         label="프로필 이미지"
                         render={(record) => (
-                            (record.profileUrl&& <img
+                            (record.profileUrl && <img
                                     src={record.profileUrl}
                                     alt="프로필 이미지"
                                     style={{width: 40, height: 40, borderRadius: "50%"}}
@@ -150,13 +157,13 @@ export const UserList = (props: any) => (
 
             <TabsContent value="personal">
                 <DataTable<UserAdminViewDTO>>
-                    <DataTable.Col source="id" label="UUID" />
-                      <DataTable.Col source="email" label="이메일" />
-                    <DataTable.Col source="phone" label="전화번호" />
-                    <DataTable.Col source="address" label="주소" />
-                    <DataTable.Col source="addressDetail" label="상세주소" />
-                    <DataTable.Col source="zipcode" label="우편번호" />
-                    <DataTable.Col source="birthDate" label="생년월일" />
+                    <DataTable.Col source="id" label="UUID"/>
+                    <DataTable.Col source="email" label="이메일"/>
+                    <DataTable.Col source="phone" label="전화번호"/>
+                    <DataTable.Col source="address" label="주소"/>
+                    <DataTable.Col source="addressDetail" label="상세주소"/>
+                    <DataTable.Col source="zipcode" label="우편번호"/>
+                    <DataTable.Col source="birthDate" label="생년월일"/>
                 </DataTable>
             </TabsContent>
         </Tabs>
@@ -165,8 +172,8 @@ export const UserList = (props: any) => (
 export const UserShow = () => (
     <Show>
         <div className="flex flex-col gap-4">
-            <RecordField source="id" />
-            <RecordField source="status" />
+            <RecordField source="id"/>
+            <RecordField source="status"/>
             <RecordField source="roles"
                          render={(record) => (
                              <div style={{display: "flex", gap: "8px"}}>
@@ -180,27 +187,27 @@ export const UserShow = () => (
                          )}
             />
             <RecordField source="createdAt">
-                <DateField source="createdAt" showTime />
+                <DateField source="createdAt" showTime/>
             </RecordField>
             <RecordField source="updatedAt">
-                <DateField source="updatedAt" showTime />
+                <DateField source="updatedAt" showTime/>
             </RecordField>
-            <RecordField source="provider" />
-            <RecordField source="userId" />
+            <RecordField source="provider"/>
+            <RecordField source="userId"/>
             <RecordField source="providerUserId" label="oauth2 Id">
 
             </RecordField>
-            <RecordField source="email" />
-            <RecordField source="phone" />
-            <RecordField source="name" />
-            <RecordField source="nickname" />
-            <RecordField source="address" />
-            <RecordField source="addressDetail" />
-            <RecordField source="zipcode" />
-            <RecordField source="bio" />
+            <RecordField source="email"/>
+            <RecordField source="phone"/>
+            <RecordField source="name"/>
+            <RecordField source="nickname"/>
+            <RecordField source="address"/>
+            <RecordField source="addressDetail"/>
+            <RecordField source="zipcode"/>
+            <RecordField source="bio"/>
             <RecordField source="profileUrl"
                          render={(record) => (
-                             (record.profileUrl&& <img
+                             (record.profileUrl && <img
                                      src={record.profileUrl}
                                      alt="프로필 이미지"
                                      style={{width: 40, height: 40, borderRadius: "50%"}}
@@ -209,14 +216,14 @@ export const UserShow = () => (
                          )}>
 
             </RecordField>
-            <RecordField source="birthDate" />
+            <RecordField source="birthDate"/>
 
         </div>
     </Show>
 );
 
 
-const RoleSelectInput = (props) => {
+const RoleSelectInput = (props: JSX.IntrinsicAttributes & ChoicesProps & Partial<InputProps> & Omit<SupportCreateSuggestionOptions<unknown>, "handleChange"> & { emptyText?: string | ReactElement; emptyValue?: any; onChange?: (value: string) => void; } & Omit<Omit<DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>, "id"> & { id: string; name: string; }, "id" | "children" | "name">) => {
     const { data, isLoading } = useGetList('roles'); // GET /roles 호출
 
     if (isLoading) return <span>Loading...</span>;
