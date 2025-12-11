@@ -117,6 +117,8 @@ public class AuthService {
         redisSession.put("uid", userUid);
         redisSession.put("provider", authInfo.getProvider());
         redisSession.put("ip", ipAddress);
+        redisSession.put("accessToken", accessToken);
+        redisSession.put("refreshToken", refreshToken);
 
         //redis db에 기록
         redisService.saveSession(userUid,newSession.getSessionId(), refreshToken, redisSession, ttlMillis);
@@ -190,6 +192,8 @@ public class AuthService {
         newRedisValue.put("uid", uid);
         newRedisValue.put("provider", provider);
         newRedisValue.put("ip", currentIpAddress);
+        newRedisValue.put("accessToken", newAccessToken);
+        newRedisValue.put("refreshToken", newRefreshToken);
 
         //Redis: 새 refreshToken 키 저장, TTL 설정
 
@@ -269,6 +273,8 @@ public class AuthService {
         redisValue.put("uid", userInfo.getUid());
         redisValue.put("provider", userInfo.getProvider());
         redisValue.put("ip", ipAddress);
+        redisValue.put("accessToken", accessToken);
+        redisValue.put("refreshToken", refreshToken);
 
         redisService.saveSession(userInfo.getUid(), sessionId, refreshToken, redisValue, ttlMillis);
 

@@ -32,18 +32,25 @@ public class SessionController {
             @RequestParam(required = false) String filter,
             HttpServletResponse response
     ) throws JsonProcessingException {
-        List<ActiveSessionDTO> sessions = sessionService.getActiveSessions(100);
+
+        List<ActiveSessionDTO> allSessions = sessionService.getActiveSessions(1000); // 전체 조회
+        int totalCount = allSessions.size();
+
+
         int start = 0;
-        int end = sessions.size() - 1;
+        int end = totalCount - 1;
+
+        List<ActiveSessionDTO> sessions = allSessions;
 
         if (range != null) {
             int[] r = objectMapper.readValue(range, int[].class);
             start = r[0];
-            end = Math.min(r[1], sessions.size() - 1);
-            sessions = sessions.subList(start, end + 1);
+            end = Math.min(r[1], totalCount - 1);
+            sessions = allSessions.subList(start, end + 1);
         }
+
         response.setHeader("Content-Range",
-                "sessions " + start + "-" + end + "/" + sessions.size());
+                "sessions " + start + "-" + end + "/" + totalCount);
         response.setHeader("Access-Control-Expose-Headers", "Content-Range");
 
         return sessions;
