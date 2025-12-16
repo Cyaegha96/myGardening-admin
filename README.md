@@ -4,7 +4,7 @@
 
 <details>
 <summary style="font-size: 20px; font-weight: bold;">프로젝트 사이트안내 및 사용방법</summary>
---테스트용 아이디: testid123 비밀번호: gardening123@
+ 테스트용 아이디: testid123 비밀번호: gardening123@
   
   관리자 아이디: admin1211 비밀번호 (요청시 발급)
 </details>
